@@ -1,23 +1,72 @@
 using UnityEngine;
 
+[RequireComponent(typeof(AudioSource))]
 public class UI_PanelManager : MonoBehaviour
 {
-    [Header("Place Panels here")]
+    [Header("Panels to control")]
     public GameObject[] panels;
 
+    [Header("Audio Settings")]
+    public AudioSource audioSource;     // Optional – if null, uses this object's AudioSource
+    public AudioClip openSound;
+    public AudioClip closeSound;
+    [Range(0f, 1f)] public float volume = 1f;
+
+    private int currentIndex = -1;
+
+    void Awake()
+    {
+        if (!audioSource)
+            audioSource = GetComponent<AudioSource>();
+    }
+
+    /// <summary>
+    /// Show panel by index and hide all others.
+    /// Plays open/close sounds as needed.
+    /// </summary>
     public void ShowPanel(int index)
     {
         if (index < 0 || index >= panels.Length) return;
 
         for (int i = 0; i < panels.Length; i++)
         {
-            panels[i].SetActive(i == index);
+            bool shouldBeActive = (i == index);
+            bool isCurrentlyActive = panels[i].activeSelf;
+
+            if (shouldBeActive && !isCurrentlyActive)
+            {
+                panels[i].SetActive(true);
+                PlaySound(openSound);
+            }
+            else if (!shouldBeActive && isCurrentlyActive)
+            {
+                panels[i].SetActive(false);
+                PlaySound(closeSound);
+            }
         }
+
+        currentIndex = index;
     }
 
+    /// <summary>
+    /// Hides all panels and plays the close sound.
+    /// </summary>
     public void HideAllPanels()
     {
         foreach (GameObject panel in panels)
-            panel.SetActive(false);
+        {
+            if (panel.activeSelf)
+            {
+                panel.SetActive(false);
+                PlaySound(closeSound);
+            }
+        }
+        currentIndex = -1;
+    }
+
+    private void PlaySound(AudioClip clip)
+    {
+        if (clip == null || audioSource == null) return;
+        audioSource.PlayOneShot(clip, volume);
     }
 }
