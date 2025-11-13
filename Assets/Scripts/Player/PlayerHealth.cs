@@ -75,4 +75,10 @@ public class PlayerHealth : MonoBehaviour
             healthBarTransform.localScale = new Vector3(healthPercent, 1f, 1f);
         }
     }
+    public void Fall()
+    {
+        //Game Over Screen
+        currentHealth = 0;
+        Destroy(gameObject);
+    }
 }
