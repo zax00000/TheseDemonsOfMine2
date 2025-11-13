@@ -45,6 +45,13 @@ public class Slime : MonoBehaviour
 
     private bool vfxSpawned = false;
 
+    [Header("Sounds")]
+
+    [SerializeField] private AudioSource punchSource;
+    [SerializeField] private AudioSource grabSource;
+    [SerializeField] private AudioSource hitSource;
+    [SerializeField] private AudioSource deathSource;
+
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -205,6 +212,10 @@ public class Slime : MonoBehaviour
             if (isDead) return;
             Health -= damageAmount;
             m_animator.SetTrigger("OnHit");
+            if (hitSource != null)
+            {
+                hitSource.Play();
+            }
             Debug.Log(Health);
 
             if (!vfxSpawned && hitVFXPrefab != null)
@@ -221,6 +232,10 @@ public class Slime : MonoBehaviour
             {
                 isDead = true;
                 m_animator.SetTrigger("Death");
+                if (deathSource != null)
+                {
+                    deathSource.Play();
+                }
             }
         }
     }
@@ -249,5 +264,21 @@ public class Slime : MonoBehaviour
         }
 
         Destroy(gameObject);
+    }
+
+    public void PlayPunchSound()
+    {
+        if (punchSource != null)
+        {
+            punchSource.Play();
+        }
+    }
+
+    public void PlayGrabSound()
+    {
+        if (grabSource != null)
+        {
+            grabSource.Play();
+        }
     }
 }

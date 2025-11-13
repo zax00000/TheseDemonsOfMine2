@@ -111,4 +111,14 @@ public class ParentConnection : MonoBehaviour
     playerController?.EnableControls();
     sword?.EnableSword();
     }
+
+    public void Step()
+    { 
+    playerController?.WalkSound();
+    }
+
+    public void Slash()
+    {
+        sword?.SlashSound();
+    }
 }

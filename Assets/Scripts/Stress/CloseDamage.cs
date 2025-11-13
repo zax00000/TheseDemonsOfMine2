@@ -15,6 +15,11 @@ public class CloseDamage : MonoBehaviour
 
     private bool playerDead = false;
 
+    [Header("Sounds")]
+
+    [SerializeField] private AudioSource a1Source;
+    [SerializeField] private AudioSource a2Source;
+
     void Start()
     {
         m_animator = GetComponentInChildren<Animator>();
@@ -91,6 +96,20 @@ public class CloseDamage : MonoBehaviour
     private void HandlePlayerDeath()
     {
         playerDead = true;
+    }
+    public void aSound()
+    {
+        int index = Random.Range(0, 1);
+
+        switch (index)
+        {
+            case 0:
+                a1Source?.Play();
+                break;
+            case 1:
+                a2Source?.Play();
+                break;
+        }
     }
 }
 

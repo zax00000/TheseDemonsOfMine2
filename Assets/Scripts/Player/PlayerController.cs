@@ -1,7 +1,8 @@
-﻿using UnityEngine;
-using UnityEngine.InputSystem;
-using System.Collections;
+﻿using System.Collections;
+using UnityEngine;
 using UnityEngine.Animations;
+using UnityEngine.Audio;
+using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
@@ -46,10 +47,14 @@ public class PlayerController : MonoBehaviour
     private bool useUnscaledTime = false;
 
     private Vector2 look = Vector2.zero;
-    [SerializeField] float worldBottomBounndary = -100f;
-    (Vector3, Quaternion) initialPositionAndRotation;
 
-    private bool isDead = true;    
+    private bool isDead = true;
+
+    [Header("Sounds")]
+
+    [SerializeField] private AudioSource dashSource;
+    [SerializeField] private AudioSource jumpSource;
+    [SerializeField] private AudioSource walkSource;
 
     public void UseUnscaledTime(bool value)
     {
@@ -65,7 +70,6 @@ public class PlayerController : MonoBehaviour
         controller = GetComponent<CharacterController>();
         animator = GetComponentInChildren<Animator>();
         sword = GetComponent<Sword>();
-        initialPositionAndRotation = (transform.position, transform.rotation);
     }
 
     void Update()
@@ -106,12 +110,20 @@ public class PlayerController : MonoBehaviour
                 isGrounded = false;
                 StartCoroutine(JumpResetDelay());
                 animator?.SetTrigger("Jump");
+                if (jumpSource != null)
+                {
+                    jumpSource.Play();
+                }
             }
             else if (canWallJump && wallJump)
             {
                 velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
                 animator?.SetTrigger("WallJump");
                 hasWallJumped = true;
+                if (jumpSource != null)
+                {
+                    jumpSource.Play();
+                }
             }
         }
 
@@ -156,8 +168,6 @@ public class PlayerController : MonoBehaviour
             animator.SetBool("Run", moveInput != Vector3.zero);
             animator.SetBool("IsGrounded", isDashing ? true : controller.isGrounded);
         }
-
-        CheckBounds();
     }
 
     public void OnMove(InputAction.CallbackContext context)
@@ -230,6 +240,10 @@ public class PlayerController : MonoBehaviour
     private IEnumerator Dash(float delta)
     {
         isDashing = true;
+        if (dashSource != null)
+        {
+            dashSource.Play();
+        }
         canDash = false;
 
         float timer = 0f;
@@ -290,15 +304,6 @@ public class PlayerController : MonoBehaviour
         velocity = Vector3.zero;
     }
 
-    void CheckBounds()
-    {
-        if (transform.position.y < worldBottomBounndary)
-        {
-            var (position, rotation) = initialPositionAndRotation;
-            Destroy(gameObject);
-        }
-    }
-
     public void DisableControls()
     {
         isDead = true;
@@ -307,5 +312,13 @@ public class PlayerController : MonoBehaviour
     public void EnableControls()
     {
         isDead = false;
+    }
+
+    public void WalkSound()
+    {
+        if (walkSource != null)
+        {
+            walkSource.Play();
+        }
     }
 }

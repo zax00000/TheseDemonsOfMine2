@@ -22,6 +22,13 @@ public class FearDamage : MonoBehaviour
     private Quaternion rootMotionDeltaRotation = Quaternion.identity;
     private bool applyRootMotionThisFrame = false;
 
+    [Header("Sounds")]
+
+    [SerializeField] private AudioSource a1Source;
+    [SerializeField] private AudioSource a2Source;
+    [SerializeField] private AudioSource a3Source;
+    [SerializeField] private AudioSource a4Source;
+
     void Start()
     {
         cooldownTimer = attackCooldown;
@@ -137,5 +144,24 @@ public class FearDamage : MonoBehaviour
     {
         dead = true;
     }
+    public void AttackSound()
+    {
+        int index = Random.Range(0, 3);
 
+        switch (index)
+        {
+            case 0:
+                a1Source?.Play();
+                break;
+            case 1:
+                a2Source?.Play();
+                break;
+            case 2:
+                a3Source?.Play();
+                break;
+            case 3:
+                a4Source?.Play();
+                break;
+        }
+    }
 }

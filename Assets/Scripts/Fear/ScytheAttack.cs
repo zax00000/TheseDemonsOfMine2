@@ -11,8 +11,16 @@ public class ScytheAttack : MonoBehaviour
 
     private Collider hitbox;
 
+    [Header("Sounds")]
+
+    [SerializeField] private AudioSource scytheSource;
+
     private void Start()
     {
+        if (scytheSource != null)
+        {
+            scytheSource.Play();
+        }
         hitbox = GetComponentInChildren<Collider>();
         hitbox.enabled = false;
         StartCoroutine(HitboxCd());

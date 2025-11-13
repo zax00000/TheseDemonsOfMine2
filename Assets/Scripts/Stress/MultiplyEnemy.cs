@@ -43,6 +43,19 @@ public class MultiplyEnemy : MonoBehaviour
     private StressConnection stressConnection;
     private GameObject auraInstance;
 
+    [Header("Sounds")]
+
+    [SerializeField] private AudioSource w1Source;
+    [SerializeField] private AudioSource w2Source;
+    [SerializeField] private AudioSource w3Source;
+    [SerializeField] private AudioSource w4Source;
+    [SerializeField] private AudioSource s1Source;
+    [SerializeField] private AudioSource s2Source;
+    [SerializeField] private AudioSource s3Source;
+    [SerializeField] private AudioSource activeSource;
+    [SerializeField] private AudioSource hitSource;
+    [SerializeField] private AudioSource deathSource;
+
     private void Awake()
     {
         stressConnection = GetComponent<StressConnection>();
@@ -118,6 +131,10 @@ public class MultiplyEnemy : MonoBehaviour
             {
                 Vector3 auraOffset = new Vector3(0, 1.5f, 0);
                 auraInstance = Instantiate(AuraVFX, transform.position + auraOffset, Quaternion.identity, transform);
+                if (activeSource != null)
+                {
+                    activeSource.Play();
+                }
             }
         }
 
@@ -180,6 +197,7 @@ public class MultiplyEnemy : MonoBehaviour
         Vector3 spawnPosition = transform.position + new Vector3(randomCircle.x, 0, randomCircle.y);
 
         GameObject copyObject = Instantiate(enemyCopyPrefab, spawnPosition, Quaternion.identity);
+        SpawnSound();
 
         AIUnit aiUnit = copyObject.GetComponent<AIUnit>();
         MultiplyEnemy copyEnemy = copyObject.GetComponent<MultiplyEnemy>();
@@ -234,6 +252,10 @@ public class MultiplyEnemy : MonoBehaviour
             isTemporarilyStunned = true;
             m_animator?.SetBool("Run", false);
             m_animator?.SetTrigger("OnHit");
+            if (hitSource != null)
+            {
+                hitSource.Play();
+            }
 
             if (hitVFXPrefab != null)
             {
@@ -253,6 +275,10 @@ public class MultiplyEnemy : MonoBehaviour
             {
                 isDead = true;
                 m_animator?.SetTrigger("Death");
+                if (deathSource != null)
+                {
+                    deathSource.Play();
+                }
                 closeDamage?.Dead();
 
                 if (selfAIUnit?.Agent != null) selfAIUnit.Agent.enabled = false;
@@ -325,6 +351,45 @@ public class MultiplyEnemy : MonoBehaviour
     {
         isTemporarilyStunned = true;
         m_animator?.SetBool("Run", false);
+    }
+
+    public void WalkSound()
+    {
+        int index = Random.Range(0, 3);
+
+        switch (index)
+        {
+            case 0:
+                w1Source?.Play();
+                break;
+            case 1:
+                w2Source?.Play();
+                break;
+            case 2:
+                w3Source?.Play();
+                break;
+            case 3:
+                w4Source?.Play();
+                break;
+        }
+    }
+
+    private void SpawnSound()
+    {
+        int index = Random.Range(0, 2);
+
+        switch (index)
+        {
+            case 0:
+                s1Source?.Play();
+                break;
+            case 1:
+                s2Source?.Play();
+                break;
+            case 2:
+                s3Source?.Play();
+                break;
+        }
     }
 
 }

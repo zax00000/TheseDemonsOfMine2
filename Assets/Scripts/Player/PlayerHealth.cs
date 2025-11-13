@@ -26,6 +26,12 @@ public class PlayerHealth : MonoBehaviour
 
     private CharacterController controller;
 
+    [Header("Sounds")]
+
+    [SerializeField] private AudioSource hit1Source;
+    [SerializeField] private AudioSource hit2Source;
+    [SerializeField] private AudioSource hit3Source;
+
     void Start()
     {
         playerController = GetComponent<PlayerController>();
@@ -47,6 +53,21 @@ public class PlayerHealth : MonoBehaviour
             currentHealth = Mathf.Clamp(currentHealth - damage, 0f, maxHealth);
             damageFlash?.Flash(currentHealth);
             UpdateHealthBar();
+
+            int index = Random.Range(0, 3);
+
+            switch (index)
+            {
+                case 0:
+                    hit1Source?.Play();
+                    break;
+                case 1:
+                    hit2Source?.Play();
+                    break;
+                case 2:
+                    hit3Source?.Play();
+                    break;
+            }
             Debug.Log("Player Health: " + currentHealth);
             StartCoroutine(DamageCooldown());
 

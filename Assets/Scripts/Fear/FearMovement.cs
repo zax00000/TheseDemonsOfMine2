@@ -31,6 +31,15 @@ public class FearMovement : MonoBehaviour
     private FearConnection fearConnection;
     private FearDamage fearDamage;
 
+    [Header("Sounds")]
+
+    [SerializeField] private AudioSource portalSource;
+    [SerializeField] private AudioSource step1Source;
+    [SerializeField] private AudioSource step2Source;
+    [SerializeField] private AudioSource spawnSource;
+    [SerializeField] private AudioSource hitSource;
+    [SerializeField] private AudioSource deathSource;
+
     private void Awake()
     {
         fearDamage = GetComponent<FearDamage>();
@@ -42,6 +51,10 @@ public class FearMovement : MonoBehaviour
 
     private void Start()
     {
+        if (spawnSource != null)
+        {
+            spawnSource.Play();
+        }
         agent = GetComponent<NavMeshAgent>();
         if (AIManager.Instance == null || AIManager.Instance.Target == null)
         {
@@ -93,9 +106,17 @@ public class FearMovement : MonoBehaviour
 
             // Spawn portal at current position
             GameObject portalA = Instantiate(portalPrefab, transform.position, Quaternion.identity);
+            if (portalSource != null)
+            {
+                portalSource.Play();
+            }
 
             // Spawn portal at predicted position
             GameObject portalB = Instantiate(portalPrefab, predictedPosition, Quaternion.identity);
+            if (portalSource != null)
+            {
+                portalSource.Play();
+            }
 
             // Teleport enemy
             transform.position = predictedPosition;
@@ -128,6 +149,11 @@ public class FearMovement : MonoBehaviour
 
             fearConnection?.FE();
 
+            if (hitSource != null)
+            {
+                hitSource.Play();
+            }
+
             Health -= damageAmount;
             isTemporarilyStunned = true;
             m_animator?.SetBool("Run", false);
@@ -150,6 +176,10 @@ public class FearMovement : MonoBehaviour
             if (Health <= 0)
             {
                 isDead = true;
+                if (deathSource != null)
+                {
+                    deathSource.Play();
+                }
                 m_animator?.SetTrigger("Death");
                 fearDamage?.Dead();
             }
@@ -211,5 +241,20 @@ public class FearMovement : MonoBehaviour
         agent.isStopped = true;
         m_animator?.SetBool("Run", false);
         isDead = true;
+    }
+
+    public void PlayStepSound()
+    {
+        int index = Random.Range(0, 1);
+
+        switch (index)
+        {
+            case 0:
+                step1Source?.Play();
+                break;
+            case 1:
+                step2Source?.Play();
+                break;
+        }
     }
 }

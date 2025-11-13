@@ -25,6 +25,10 @@ public class SlimeTarget : MonoBehaviour
 
     private bool playerDead = false;
 
+    [Header("Sounds")]
+
+    [SerializeField] private AudioSource walkSource;
+
 
     void Start()
     {
@@ -57,6 +61,7 @@ public class SlimeTarget : MonoBehaviour
                 isChasing = false;
                 activated = false;
                 m_animator.SetBool("Walk", false);
+                SoundStop();
             }
             return;
         }
@@ -69,6 +74,7 @@ public class SlimeTarget : MonoBehaviour
                 isChasing = false;
                 slime.SetChaseState(false);
                 m_animator.SetBool("Walk", false);
+                SoundStop();
                 m_animator.SetTrigger("Grab");
 
                 if (grabCooldownRoutine == null)
@@ -84,6 +90,7 @@ public class SlimeTarget : MonoBehaviour
             isChasing = false;
             slime.SetChaseState(false);
             m_animator.SetBool("Walk", false);
+            SoundStop();
             m_animator.SetTrigger("Punch");
 
             if (punchCooldownRoutine == null)
@@ -100,6 +107,7 @@ public class SlimeTarget : MonoBehaviour
                 isChasing = true;
                 slime.SetChaseState(true);
                 m_animator.SetBool("Walk", true);
+                SoundPlay();
             }
             agent.isStopped = false;
             agent.destination = Target.position;
@@ -134,5 +142,22 @@ public class SlimeTarget : MonoBehaviour
         isChasing = false;
         playerDead = true;
         m_animator.SetBool("Walk", false);
+        SoundStop();
+    }
+
+    private void SoundPlay()
+    {
+        if (walkSource != null)
+        {
+            walkSource.Play();
+        }
+    }
+
+    private void SoundStop()
+    {
+        if (walkSource != null)
+        {
+            walkSource.Stop();
+        }
     }
 }

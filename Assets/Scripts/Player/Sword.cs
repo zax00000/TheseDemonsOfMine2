@@ -1,6 +1,8 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Random = UnityEngine.Random;
 
 public class Sword : MonoBehaviour
 {
@@ -52,6 +54,13 @@ public class Sword : MonoBehaviour
     public bool isHeld = false;
 
     public bool isDead = true;
+
+    [Header("Sounds")]
+
+    [SerializeField] private AudioSource parrySource;
+    [SerializeField] private AudioSource s1Source;
+    [SerializeField] private AudioSource s2Source;
+    [SerializeField] private AudioSource s3Source;
 
     void Start()
     {
@@ -193,6 +202,7 @@ public class Sword : MonoBehaviour
     private IEnumerator SaveCooldown()
     {
         yield return new WaitForSecondsRealtime(saveCd);
+        if (isDead) yield break;
         childAnimator.SetTrigger("Save");
         saveCooldownRoutine = null;
     }
@@ -341,6 +351,10 @@ public class Sword : MonoBehaviour
 
     public void ParryTime()
     {
+        if (parrySource != null)
+        {
+            parrySource.Play();
+        }
         if (isParryTimeActive) return;
         isParryTimeActive = true;
         parryTimeRoutine = StartCoroutine(SlowWorldExceptPlayer(0.1f, 5f));
@@ -391,5 +405,23 @@ public class Sword : MonoBehaviour
     public void EnableSword()
     {
         isDead = false;
+    }
+
+    public void SlashSound()
+    {
+        int index = Random.Range(0, 3);
+
+        switch (index)
+        {
+            case 0:
+                s1Source?.Play();
+                break;
+            case 1:
+                s2Source?.Play();
+                break;
+            case 2:
+                s3Source?.Play();
+                break;
+        }
     }
 }

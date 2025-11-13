@@ -58,4 +58,14 @@ public class SlimeConnection : MonoBehaviour
     { 
     GrabCollision?.DeactivateLPunch();
     }
+
+    public void PunchSound()
+    {
+        slime?.PlayPunchSound();
+    }
+
+    public void GrabSound()
+    {
+        slime?.PlayGrabSound();
+    }
 }

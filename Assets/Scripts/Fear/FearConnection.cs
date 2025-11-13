@@ -47,4 +47,13 @@ public class FearConnection : MonoBehaviour
         fearMovement?.ResumeTracking();
     }
 
+    public void Step()
+    {
+        fearMovement?.PlayStepSound();
+    }
+
+    public void Attack()
+    { 
+    fearDamage?.AttackSound();
+    }
 }

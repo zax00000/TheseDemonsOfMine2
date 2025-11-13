@@ -6,11 +6,14 @@ public class StressConnection : MonoBehaviour
 
     private StressCollision stressCollision;
 
+    private CloseDamage closeDamage;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         multiplyEnemy = GetComponentInParent<MultiplyEnemy>();
         stressCollision = GetComponentInChildren<StressCollision>();
+        closeDamage = GetComponentInParent<CloseDamage>();
     }
 
     // Update is called once per frame
@@ -57,5 +60,15 @@ public class StressConnection : MonoBehaviour
     public void Tracking()
     {
         multiplyEnemy?.ResumeTracking();
+    }
+
+    public void Step()
+    {
+        multiplyEnemy?.WalkSound();
+    }
+
+    public void Attack()
+    {
+        closeDamage?.aSound();
     }
 }

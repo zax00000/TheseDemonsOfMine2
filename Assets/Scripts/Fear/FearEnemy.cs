@@ -31,6 +31,10 @@ public class FearEnemy : MonoBehaviour
 
     private Vector3 offset = new Vector3(0.5f, 0f, 0f);
 
+    [Header("Sounds")]
+
+    [SerializeField] private AudioSource portalSource;
+
     private void Awake()
     {
         player = GameObject.FindGameObjectWithTag("Player")?.transform;
@@ -228,6 +232,10 @@ public class FearEnemy : MonoBehaviour
     {
         if (portalPrefab != null)
         {
+            if (portalSource != null)
+            {
+                portalSource.Play();
+            }
             Vector3 portalPosition = enemyTeleportPosition;
             Quaternion portalRotation = transform.rotation;
 
