@@ -46,12 +46,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9e62a3ed05c9c34f8e787fdad51432f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FearEnemy
-  activationDistance: 12
+  activationDistance: 20
   attackDistance: 1.5
   timeBetweenTeleports: 1.5
   canTeleport: 1
   portalLifetime: 1.5
-  finalPortalScale: 2
+  finalPortalScale: 1.8
   portalPrefab: {fileID: 3118087145514759983, guid: 5d532c2958b4afa45839ff7f49909e8e, type: 3}
   scythePrefab: {fileID: 5233546524638055994, guid: 152536940de38d947889d85f1930703a, type: 3}
   Fear: {fileID: 879069621304188504, guid: a65939b4691c9af4cb99abef2008796e, type: 3}

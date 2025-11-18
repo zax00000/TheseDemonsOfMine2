@@ -1,20 +1,19 @@
-using System.Collections;
 using UnityEngine;
 
 public class FearHitbox : MonoBehaviour
 {
-    public Collider hitbox;
-    public Collider hitbox2;
+    [Header("Hitboxes")]
+    [SerializeField] private Collider hitbox;
+    [SerializeField] private Collider hitbox2;
 
-    public LayerMask targetLayer;
+    [Header("Damage Settings")]
+    [SerializeField] private LayerMask targetLayer;
+    [SerializeField] private float damage = 50f;
 
-    private float damage = 25f;
+    public bool dead = false;
 
-    void Start()
+    private void Start()
     {
-        hitbox = GetComponent<Collider>();
-        hitbox2 = GetComponent<Collider>();
-
         if (hitbox != null)
         {
             hitbox.isTrigger = true;
@@ -30,6 +29,7 @@ public class FearHitbox : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        if (dead) return;
         if (((1 << other.gameObject.layer) & targetLayer) == 0) return;
 
         PlayerController player = other.GetComponent<PlayerController>();

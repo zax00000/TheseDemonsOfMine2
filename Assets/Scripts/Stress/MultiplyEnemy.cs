@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 
 [DefaultExecutionOrder(100)]
 public class MultiplyEnemy : MonoBehaviour
@@ -56,6 +57,7 @@ public class MultiplyEnemy : MonoBehaviour
     [SerializeField] private AudioSource hitSource;
     [SerializeField] private AudioSource deathSource;
 
+    [SerializeField] private GameObject damagePopupPrefab;
     private void Awake()
     {
         stressConnection = GetComponent<StressConnection>();
@@ -87,8 +89,8 @@ public class MultiplyEnemy : MonoBehaviour
 
     private void Update()
     {
+        if (player == null) return;
         if (isDead) return;
-
         if (!isActivated && isLeader && Vector3.Distance(transform.position, player.position) <= activationDistance)
         {
             Activate();
@@ -243,7 +245,7 @@ public class MultiplyEnemy : MonoBehaviour
         if (!damaged)
         {
             damaged = true;
-
+            ShowDamagePopup(damageAmount, hitPoint);
             stressConnection?.A1OFF();
             stressConnection?.A2OFF();
             stressConnection?.A3OFF();
@@ -391,5 +393,16 @@ public class MultiplyEnemy : MonoBehaviour
                 break;
         }
     }
+    private void ShowDamagePopup(int damageAmount, Vector3 hitPoint)
+    {
+        if (damagePopupPrefab == null) return;
 
+        Vector3 spawnPos = hitPoint + Vector3.up * 1f; // Offset above hit
+        GameObject popup = Instantiate(damagePopupPrefab, spawnPos, Quaternion.identity);
+        DamagePopup popupScript = popup.GetComponent<DamagePopup>();
+        if (popupScript != null)
+        {
+            popupScript.Setup(damageAmount, Color.white);
+        }
+    }
 }

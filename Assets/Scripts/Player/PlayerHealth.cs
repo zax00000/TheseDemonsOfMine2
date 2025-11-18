@@ -1,7 +1,9 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Networking.PlayerConnection;
 using UnityEngine.SceneManagement;
+using Random = UnityEngine.Random;
 
 
 public class PlayerHealth : MonoBehaviour
@@ -10,9 +12,9 @@ public class PlayerHealth : MonoBehaviour
     [SerializeField] private float currentHealth;
 
     [Header("UI Health Bar")]
-    [SerializeField] private Transform healthBarTransform; // This should be the fill sprite's transform
+    [SerializeField] public Transform healthBarTransform; // This should be the fill sprite's transform
 
-    private bool damaged = false;
+    public bool damaged = false;
 
     private DamageFlash damageFlash;
 
@@ -32,6 +34,10 @@ public class PlayerHealth : MonoBehaviour
     [SerializeField] private AudioSource hit2Source;
     [SerializeField] private AudioSource hit3Source;
 
+    [SerializeField] private GameObject damagePopupPrefab;
+
+    [SerializeField] private Transform damagePopupAnchor;
+
     void Start()
     {
         playerController = GetComponent<PlayerController>();
@@ -50,6 +56,7 @@ public class PlayerHealth : MonoBehaviour
         if (!damaged && !isDead)
         {
             damaged = true;
+            ShowDamagePopup(damage);
             currentHealth = Mathf.Clamp(currentHealth - damage, 0f, maxHealth);
             damageFlash?.Flash(currentHealth);
             UpdateHealthBar();
@@ -79,12 +86,12 @@ public class PlayerHealth : MonoBehaviour
                 playerController?.DisableControls();
                 playerSword?.DisableSword();
             }
-        }
+        } return;
     }
 
     IEnumerator DamageCooldown()
     {
-        yield return new WaitForSecondsRealtime(0.2f);
+        yield return new WaitForSecondsRealtime(.2f);
         damaged = false;
     }
 
@@ -98,8 +105,22 @@ public class PlayerHealth : MonoBehaviour
     }
     public void Fall()
     {
-        //Game Over Screen
         currentHealth = 0;
-        Destroy(gameObject);
+        UpdateHealthBar();
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
+        SceneManager.LoadScene("END");
+    }
+    private void ShowDamagePopup(float damageAmount)
+    {
+        if (damagePopupPrefab == null || damagePopupAnchor == null) return;
+
+        Vector3 spawnPos = damagePopupAnchor.position + Random.insideUnitSphere * 0.2f;
+        GameObject popup = Instantiate(damagePopupPrefab, spawnPos, Quaternion.identity);
+        DamagePopup popupScript = popup.GetComponent<DamagePopup>();
+        if (popupScript != null)
+        {
+            popupScript.Setup(Mathf.RoundToInt(damageAmount), Color.red);
+        }
     }
 }

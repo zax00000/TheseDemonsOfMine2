@@ -55,14 +55,14 @@ ModelImporter:
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
       events:
-      - time: 0.15234375
+      - time: 0.16821676
         functionName: Attack
         data: 
         objectReferenceParameter: {instanceID: 0}
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
-      - time: 0.16877638
+      - time: 0.1941732
         functionName: F
         data: 
         objectReferenceParameter: {instanceID: 0}
@@ -76,7 +76,14 @@ ModelImporter:
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
-      - time: 0.6666667
+      - time: 0.53515625
+        functionName: Attack
+        data: 
+        objectReferenceParameter: {instanceID: 0}
+        floatParameter: 0
+        intParameter: 0
+        messageOptions: 0
+      - time: 0.6507937
         functionName: FE
         data: 
         objectReferenceParameter: {instanceID: 0}
@@ -92,13 +99,6 @@ ModelImporter:
         messageOptions: 0
       - time: 0.78440994
         functionName: Track
-        data: 
-        objectReferenceParameter: {instanceID: 0}
-        floatParameter: 0
-        intParameter: 0
-        messageOptions: 0
-      - time: 0.53515625
-        functionName: Attack
         data: 
         objectReferenceParameter: {instanceID: 0}
         floatParameter: 0

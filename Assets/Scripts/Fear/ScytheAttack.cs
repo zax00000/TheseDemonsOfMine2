@@ -36,7 +36,7 @@ public class ScytheAttack : MonoBehaviour
 
     private IEnumerator HitboxCd()
     {
-        yield return new WaitForSeconds(.1f);
+        yield return new WaitForSeconds(.15f);
         hitbox.enabled = true;
     }
 
@@ -55,7 +55,7 @@ public class ScytheAttack : MonoBehaviour
             PlayerHealth playerHealth = other.GetComponent<PlayerHealth>();
             if (playerHealth != null)
             {
-                playerHealth.TakeDamage(300);
+                playerHealth.TakeDamage(600);
             }
             Spawner?.OnFailedParry();
         }

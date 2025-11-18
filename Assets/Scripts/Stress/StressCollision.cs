@@ -5,23 +5,18 @@ public class StressCollision : MonoBehaviour
 {
     public Collider LTrigger;
     public Collider RTrigger;
-    public Collider LCollider;
-    public Collider RCollider;
 
     private StressConnection stressConnection;
 
     public LayerMask targetLayer;
 
-    private float damage;
+    private float damage = 10f;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         LTrigger.enabled = false;
         RTrigger.enabled = false;
-
-        LCollider.enabled = false;
-        RCollider.enabled = false;
 
         stressConnection = GetComponentInParent<StressConnection>();
     }
@@ -50,7 +45,6 @@ public class StressCollision : MonoBehaviour
                 if (playerHealth != null)
                 {
                     playerHealth.TakeDamage(damage);
-                    Collision();
                 }
             }
         }
@@ -58,56 +52,36 @@ public class StressCollision : MonoBehaviour
 
     public void A1()
     {
-        RCollider.enabled = true;
-        RTrigger.enabled = true;
         damage = 10;
+        RTrigger.enabled = true;
     }
 
     public void A1END()
     {
-        RCollider.enabled = false;
         RTrigger.enabled = false;
     }
 
     public void A2()
     {
-        LCollider.enabled = true;
-        LTrigger.enabled = true;
         damage = 15;
+        LTrigger.enabled = true;
     }
 
     public void A2END()
     {
-        LCollider.enabled = false;
         LTrigger.enabled = false;
     }
 
     public void A3()
     {
-        RCollider.enabled = true;
-        RTrigger.enabled = true;
-        LCollider.enabled = true;
-        LTrigger.enabled = true;
         damage = 20;
+        RTrigger.enabled = true;
+        LTrigger.enabled = true;
     }
 
     public void A3END()
     {
-        RCollider.enabled = false;
         RTrigger.enabled = false;
-        LCollider.enabled = false;
         LTrigger.enabled = false;
-    }
-
-    private void Collision()
-    {
-        StartCoroutine(DelayedResetCollision());
-    }
-
-    IEnumerator DelayedResetCollision()
-    {
-        yield return new WaitForSeconds(0.01f);
-        RCollider.enabled = false;
-        LCollider.enabled = false;
     }
 }

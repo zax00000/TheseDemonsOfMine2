@@ -11,9 +11,12 @@ public class ParentConnection : MonoBehaviour
 
     private Animator animator;
 
+    private PlayerHealth health;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        health = GetComponentInParent<PlayerHealth>();
         sword = GetComponentInParent<Sword>();
         playerController = GetComponentInParent<PlayerController>();
         swordHitbox = GetComponentInChildren<SwordHitbox>();
@@ -100,10 +103,9 @@ public class ParentConnection : MonoBehaviour
 
     public void End()
     {
-        if (GameManager.Instance != null)
-        {
-            GameManager.Instance.PlayerDied();
-        }
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
+        SceneManager.LoadScene("END");
     }
 
     public void Spawned()

@@ -1,175 +1,115 @@
-using System;
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using System.Collections.Generic;
-using System.Linq;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
-    public static GameManager Instance { get; private set; }
+    private GameObject currentPlayer;
 
-    public enum GameState
+    [Header("Player Settings")]
+    [SerializeField] private GameObject playerPrefab;
+    [SerializeField] private Transform spawnPoint;
+    [SerializeField] private Transform healthBarFill;
+    [SerializeField] private Image eye;
+
+    [Header("Camera Settings")]
+    [SerializeField] private CameraFollow cameraFollow;
+
+    [Header("Anxiety Spawn Points")]
+
+    [SerializeField] private GameObject anxietyPrefab;
+    [SerializeField] private Transform a1;
+    [SerializeField] private Transform a2;
+    [SerializeField] private Transform a3;
+    [SerializeField] private Transform a4;
+    [SerializeField] private Transform a5;
+    [SerializeField] private Transform a6;
+
+    [Header("Stress Spawn Points")]
+
+    [SerializeField] private GameObject stressPrefab;
+    [SerializeField] private Transform s1;
+    [SerializeField] private Transform s3;
+    [SerializeField] private Transform s4;
+    [SerializeField] private Transform s5;
+    [SerializeField] private Transform s6;
+    [SerializeField] private Transform s7;
+
+    [Header("Fear Spawn")]
+
+    [SerializeField] private GameObject fearPrefab;
+    [SerializeField] private Transform F;
+
+    void Start()
     {
-        MainMenu,
-        NameInput,
-        Playing,
-        Paused,
-        GameOver
+        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked;
+        SpawnPlayer();
+        SpawnAnxiety();
+        SpawnStress();
+        SpawnFear();
     }
 
-    public GameState CurrentState { get; private set; }
-    private int currentScore;
-    private string currentPlayerName;
-    private const string HighScoreKey = "HighScores";
-
-    private int lastScore;
-    private string lastName;
-
-    public static event Action<GameState> OnGameStateChanged;
-    public static event Action<int> OnScoreChanged;
-
-    private void Awake()
+    public void SpawnPlayer()
     {
-        if (Instance != null && Instance != this)
+        if (playerPrefab == null || spawnPoint == null || cameraFollow == null)
         {
-            Destroy(gameObject);
+            Debug.LogError("Missing references in GameManager!");
             return;
         }
-        Instance = this;
-        DontDestroyOnLoad(gameObject);
-    }
 
-    private void Start()
-    {
-        UpdateGameState(GameState.MainMenu);
-    }
-
-    public void UpdateGameState(GameState newState)
-    {
-        CurrentState = newState;
-
-        switch (CurrentState)
+        if (currentPlayer != null)
         {
-            case GameState.MainMenu:
-            case GameState.NameInput:
-            case GameState.Paused:
-            case GameState.GameOver:
-                Time.timeScale = 0f;
-                break;
-            case GameState.Playing:
-                Time.timeScale = 1f;
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(newState), newState, null);
+            Destroy(currentPlayer);
         }
 
-        OnGameStateChanged?.Invoke(newState);
-    }
+        currentPlayer = Instantiate(playerPrefab, spawnPoint.position, spawnPoint.rotation);
 
-    public void PauseGame()
-    {
-        if (CurrentState != GameState.Playing) return;
-        UpdateGameState(GameState.Paused);
-        SceneManager.LoadScene("PauseMenu", LoadSceneMode.Additive);
-    }
+        // Assign camera target
+        cameraFollow.target = currentPlayer.transform;
 
-    public void ResumeGame()
-    {
-        if (CurrentState != GameState.Paused) return;
-        SceneManager.UnloadSceneAsync("PauseMenu");
-        UpdateGameState(GameState.Playing);
-    }
-
-    public void ShowNameInput()
-    {
-        UpdateGameState(GameState.NameInput);
-    }
-
-    public void ConfirmNameAndStartGame(string playerName)
-    {
-        currentPlayerName = playerName;
-        if (string.IsNullOrWhiteSpace(currentPlayerName))
+        // Assign AI target
+        if (AIManager.Instance != null)
         {
-            currentPlayerName = "Player";
-        }
-        
-        SceneManager.LoadScene(1);
-        ResetScore();
-        UpdateGameState(GameState.Playing);
-    }
-
-    public void PlayerDied()
-    {
-        lastScore = currentScore;
-        lastName = currentPlayerName;
-
-        SaveCurrentScore();
-        UpdateGameState(GameState.GameOver);
-        SceneManager.LoadScene("GameOverScreen");
-    }
-
-    private void SaveCurrentScore()
-    {
-        var newEntry = new HighScoreEntry { playerName = currentPlayerName, score = currentScore };
-
-        string json = PlayerPrefs.GetString(HighScoreKey, "{}");
-        HighScores highScores = JsonUtility.FromJson<HighScores>(json);
-
-        if (highScores.scores == null)
-        {
-            highScores.scores = new List<HighScoreEntry>();
+            AIManager.Instance.Target = currentPlayer.transform;
         }
 
-        highScores.scores.Add(newEntry);
-        highScores.scores = highScores.scores.OrderByDescending(s => s.score).ToList();
-
-        if (highScores.scores.Count > 10)
+        // Assign health bar transform
+        PlayerHealth playerHealth = currentPlayer.GetComponent<PlayerHealth>();
+        if (playerHealth != null && healthBarFill != null)
         {
-            highScores.scores = highScores.scores.Take(10).ToList();
+            playerHealth.healthBarTransform = healthBarFill;
         }
 
-        string updatedJson = JsonUtility.ToJson(highScores);
-        PlayerPrefs.SetString(HighScoreKey, updatedJson);
-        PlayerPrefs.Save();
-    }
-
-    public void AddScore(int points)
-    {
-        if (CurrentState != GameState.Playing) return;
-        currentScore += points;
-        OnScoreChanged?.Invoke(currentScore);
-    }
-    
-    private void ResetScore()
-    {
-        currentScore = 0;
-        OnScoreChanged?.Invoke(currentScore);
-    }
-
-    public void RetryGame()
-    {
-        SceneManager.LoadScene(1);
-        ResetScore();
-        UpdateGameState(GameState.Playing);
-    }
-
-    public void GoToMainMenu()
-    {
-        SceneManager.LoadScene(0);
-        UpdateGameState(GameState.MainMenu);
-    }
-
-    public HighScores GetHighScores()
-    {
-        string json = PlayerPrefs.GetString(HighScoreKey, "{}");
-        HighScores highScores = JsonUtility.FromJson<HighScores>(json);
-        if (highScores.scores == null)
+        // Assign UI Parry
+        Sword playersword = currentPlayer.GetComponent<Sword>();
+        if (playersword != null && eye != null)
         {
-            highScores.scores = new List<HighScoreEntry>();
+            playersword.eye = eye;
         }
-        return highScores;
     }
 
-    public int GetLastScore() => lastScore;
-    public string GetLastName() => lastName;
+    public void SpawnAnxiety()
+    {
+        Instantiate(anxietyPrefab, a1.position, a1.rotation);
+        Instantiate(anxietyPrefab, a2.position, a2.rotation);
+        Instantiate(anxietyPrefab, a3.position, a3.rotation);
+        Instantiate(anxietyPrefab, a4.position, a4.rotation);
+        Instantiate(anxietyPrefab, a5.position, a5.rotation);
+        Instantiate(anxietyPrefab, a6.position, a6.rotation);
+    }
+
+    public void SpawnStress()
+    {
+        Instantiate(stressPrefab, s1.position, s1.rotation);
+        Instantiate(stressPrefab, s3.position, s3.rotation);
+        Instantiate(stressPrefab, s4.position, s4.rotation);
+        Instantiate(stressPrefab, s5.position, s5.rotation);
+        Instantiate(stressPrefab, s6.position, s6.rotation);
+        Instantiate(stressPrefab, s7.position, s7.rotation);
+    }
+
+    public void SpawnFear()
+    {
+        Instantiate(fearPrefab, F.position, F.rotation);
+    }
 }

@@ -52,6 +52,8 @@ public class Slime : MonoBehaviour
     [SerializeField] private AudioSource hitSource;
     [SerializeField] private AudioSource deathSource;
 
+    [SerializeField] private GameObject damagePopupPrefab;
+
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -204,12 +206,14 @@ public class Slime : MonoBehaviour
     {
         if (!damaged)
         {
+            if (isDead) return;
             damaged = true;
             vfxSpawned = false;
+            ShowDamagePopup(damageAmount, hitPoint);
             slimeConnection?.GrabOff();
             slimeConnection?.RPunchOff();
             slimeConnection?.LPunchOff();
-            if (isDead) return;
+            
             Health -= damageAmount;
             m_animator.SetTrigger("OnHit");
             if (hitSource != null)
@@ -279,6 +283,18 @@ public class Slime : MonoBehaviour
         if (grabSource != null)
         {
             grabSource.Play();
+        }
+    }
+    private void ShowDamagePopup(int damageAmount, Vector3 hitPoint)
+    {
+        if (damagePopupPrefab == null) return;
+
+        Vector3 spawnPos = hitPoint + Vector3.up * 1f; // Offset above hit
+        GameObject popup = Instantiate(damagePopupPrefab, spawnPos, Quaternion.identity);
+        DamagePopup popupScript = popup.GetComponent<DamagePopup>();
+        if (popupScript != null)
+        {
+            popupScript.Setup(damageAmount, Color.white);
         }
     }
 }

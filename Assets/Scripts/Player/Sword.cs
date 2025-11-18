@@ -2,6 +2,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
 public class Sword : MonoBehaviour
@@ -40,6 +41,7 @@ public class Sword : MonoBehaviour
     private CharacterController controller;
     private PlayerController playerController;
     private ParentConnection parentConnection;
+    private PlayerHealth playerHealth;
 
     // Root motion cache
     private Vector3 rootMotionDeltaPosition = Vector3.zero;
@@ -62,8 +64,17 @@ public class Sword : MonoBehaviour
     [SerializeField] private AudioSource s2Source;
     [SerializeField] private AudioSource s3Source;
 
+    [SerializeField] public Image eye;
+
+    [SerializeField] private float gravity = -9.81f;
+    private float verticalVelocity = 0f;
+
+    public bool parryTime = false;
+
     void Start()
     {
+        SetAlpha(.2f);
+        playerHealth = GetComponent<PlayerHealth>();
         playerController = GetComponent<PlayerController>();
         SwordHitbox = GetComponentInChildren<SwordHitbox>();
         controller = GetComponent<CharacterController>();
@@ -96,14 +107,29 @@ public class Sword : MonoBehaviour
     {
         if (!applyRootMotionThisFrame || controller == null || playerController == null) return;
 
+        // Apply gravity if not grounded
+        if (!controller.isGrounded)
+        {
+            verticalVelocity += gravity * Time.fixedDeltaTime;
+        }
+        else
+        {
+            verticalVelocity = 0f;
+        }
+
+        Vector3 motion = rootMotionDeltaPosition;
+
+        // Blend gravity into root motion
+        motion.y += verticalVelocity * Time.fixedDeltaTime;
+
         if (!playerController.IsDashing())
         {
-            controller.Move(rootMotionDeltaPosition);
+            controller.Move(motion);
             transform.rotation *= rootMotionDeltaRotation;
         }
         else
         {
-            controller.Move(new Vector3(0, rootMotionDeltaPosition.y, 0));
+            controller.Move(new Vector3(0, motion.y, 0));
         }
 
         rootMotionDeltaPosition = Vector3.zero;
@@ -237,12 +263,12 @@ public class Sword : MonoBehaviour
         slash2 = true;
         attackOnCooldown = false;
         StartCoroutine(ResetSlash2());
-        Debug.Log("S2 available for 0.3");
+        Debug.Log("S2 available for 0.5");
     }
 
     private IEnumerator ResetSlash2()
     {
-        yield return new WaitForSecondsRealtime(0.3f);
+        yield return new WaitForSecondsRealtime(0.5f);
         Debug.Log("S2 end");
         slash2 = false;
         attackOnCooldown = true;
@@ -254,13 +280,13 @@ public class Sword : MonoBehaviour
         slash3 = true;
         attackOnCooldown = false;
         StartCoroutine(ResetSlash3());
-        Debug.Log("S3 available for 0.3");
+        Debug.Log("S3 available for 0.5");
         s2 = false;
     }
 
     private IEnumerator ResetSlash3()
     {
-        yield return new WaitForSecondsRealtime(0.3f);
+        yield return new WaitForSecondsRealtime(0.5f);
         Debug.Log("S3 end");
         slash3 = false;
         attackOnCooldown = true;
@@ -351,12 +377,15 @@ public class Sword : MonoBehaviour
 
     public void ParryTime()
     {
+        parryTime = true;
+        playerHealth.damaged = true;
         if (parrySource != null)
         {
             parrySource.Play();
         }
         if (isParryTimeActive) return;
         isParryTimeActive = true;
+        SetAlpha(1f);
         parryTimeRoutine = StartCoroutine(SlowWorldExceptPlayer(0.1f, 5f));
         Debug.Log("Parry Time Activated");
     }
@@ -373,8 +402,11 @@ public class Sword : MonoBehaviour
 
         yield return new WaitForSecondsRealtime(duration);
 
+        parryTime = false;
+        playerHealth.damaged = false;
         Time.timeScale = 1f;
         Time.fixedDeltaTime = 0.02f;
+        SetAlpha(.2f);
 
         childAnimator.updateMode = AnimatorUpdateMode.Normal;
         playerController.UseUnscaledTime(false);
@@ -422,6 +454,16 @@ public class Sword : MonoBehaviour
             case 2:
                 s3Source?.Play();
                 break;
+        }
+    }
+
+    public void SetAlpha(float alpha)
+    {
+        if (eye != null)
+        {
+            Color color = eye.color;
+            color.a = Mathf.Clamp01(alpha); // Clamp between 0 and 1
+            eye.color = color;
         }
     }
 }

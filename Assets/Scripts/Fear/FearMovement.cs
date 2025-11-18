@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -32,13 +32,16 @@ public class FearMovement : MonoBehaviour
     private FearDamage fearDamage;
 
     [Header("Sounds")]
-
     [SerializeField] private AudioSource portalSource;
     [SerializeField] private AudioSource step1Source;
     [SerializeField] private AudioSource step2Source;
     [SerializeField] private AudioSource spawnSource;
     [SerializeField] private AudioSource hitSource;
     [SerializeField] private AudioSource deathSource;
+
+    public static event System.Action OnFearEnemyDeath;
+
+    [SerializeField] private GameObject damagePopupPrefab;
 
     private void Awake()
     {
@@ -51,10 +54,8 @@ public class FearMovement : MonoBehaviour
 
     private void Start()
     {
-        if (spawnSource != null)
-        {
-            spawnSource.Play();
-        }
+        if (spawnSource != null) spawnSource.Play();
+
         agent = GetComponent<NavMeshAgent>();
         if (AIManager.Instance == null || AIManager.Instance.Target == null)
         {
@@ -95,40 +96,72 @@ public class FearMovement : MonoBehaviour
         }
     }
 
-    private void HandleTeleportation()
+   private void HandleTeleportation()
+{
+    teleportTimer -= Time.deltaTime;
+
+    float distanceToPlayer = Vector3.Distance(transform.position, Target.position);
+    if (distanceToPlayer > teleportRange && teleportTimer <= 0f)
     {
-        teleportTimer -= Time.deltaTime;
+        Vector3 predictedPosition = GetPlayerPredictedPosition();
 
-        float distanceToPlayer = Vector3.Distance(transform.position, Target.position);
-        if (distanceToPlayer > teleportRange && teleportTimer <= 0f)
+        // Sample from above to ensure valid NavMesh hit (especially on slopes)
+        Vector3 sampleOrigin = predictedPosition + Vector3.up * 2f;
+        if (NavMesh.SamplePosition(sampleOrigin, out NavMeshHit hit, 4f, NavMesh.AllAreas))
         {
-            Vector3 predictedPosition = GetPlayerPredictedPosition();
+            Vector3 teleportTarget = hit.position;
 
-            // Spawn portal at current position
-            GameObject portalA = Instantiate(portalPrefab, transform.position, Quaternion.identity);
-            if (portalSource != null)
-            {
-                portalSource.Play();
-            }
+            // Force transform to match NavMesh height
+            transform.position = teleportTarget;
 
-            // Spawn portal at predicted position
-            GameObject portalB = Instantiate(portalPrefab, predictedPosition, Quaternion.identity);
-            if (portalSource != null)
-            {
-                portalSource.Play();
-            }
+            // Warp agent
+            fearConnection?.FE();
+            agent.Warp(teleportTarget);
 
-            // Teleport enemy
-            transform.position = predictedPosition;
+            // Spawn portals
+            Vector3 portalStartPos = new Vector3(transform.position.x, teleportTarget.y, transform.position.z);
+            Vector3 portalEndPos = new Vector3(teleportTarget.x, teleportTarget.y, teleportTarget.z);
 
-            // Clean up portals after 0.3 seconds
+            GameObject portalA = Instantiate(portalPrefab, portalStartPos, Quaternion.identity);
+            GameObject portalB = Instantiate(portalPrefab, portalEndPos, Quaternion.identity);
+            portalSource?.Play();
+
             Destroy(portalA, 0.3f);
             Destroy(portalB, 0.3f);
 
-            // Reset cooldown
             teleportTimer = teleportCooldown;
+
+            StartCoroutine(RepathAfterTeleport());
+        }
+        else
+        {
+            Debug.LogWarning("Teleportation failed: no valid NavMesh position found.");
         }
     }
+}
+
+private IEnumerator RepathAfterTeleport()
+{
+    yield return new WaitForSeconds(0.05f); // Let physics/navmesh settle
+
+    if (!isDead && !isTemporarilyStunned && agent != null && Target != null)
+    {
+        agent.ResetPath();
+        agent.isStopped = false;
+
+        // Sample a valid destination near the player
+        Vector3 sampleOrigin = Target.position + Vector3.up * 2f;
+        if (NavMesh.SamplePosition(sampleOrigin, out NavMeshHit hit, 2f, NavMesh.AllAreas))
+        {
+            agent.SetDestination(hit.position);
+        }
+        else
+        {
+            Debug.LogWarning("Repath failed: no valid NavMesh near player.");
+        }
+    }
+}
+
 
 
     private Vector3 GetPlayerPredictedPosition()
@@ -142,47 +175,40 @@ public class FearMovement : MonoBehaviour
 
     public void TakeDamage(int damageAmount, Vector3 hitPoint)
     {
-        if (isDead) return;
-        if (!damaged)
+        if (isDead || damaged) return;
+
+        damaged = true;
+        ShowDamagePopup(damageAmount, hitPoint);
+        fearConnection?.FE();
+        hitSource?.Play();
+
+        Health -= damageAmount;
+        isTemporarilyStunned = true;
+        m_animator?.SetBool("Run", false);
+        m_animator?.SetTrigger("OnHit");
+
+        if (hitVFXPrefab != null)
         {
-            damaged = true;
+            GameObject vfx = Instantiate(hitVFXPrefab, hitPoint, Quaternion.identity);
+            Destroy(vfx, 1f);
+        }
 
-            fearConnection?.FE();
+        if (rb != null)
+        {
+            rb.isKinematic = false;
+            rb.constraints = RigidbodyConstraints.None;
+        }
 
-            if (hitSource != null)
-            {
-                hitSource.Play();
-            }
+        StartCoroutine(DamageCooldown());
 
-            Health -= damageAmount;
-            isTemporarilyStunned = true;
-            m_animator?.SetBool("Run", false);
-            m_animator?.SetTrigger("OnHit");
-
-            if (hitVFXPrefab != null)
-            {
-                GameObject vfx = Instantiate(hitVFXPrefab, hitPoint, Quaternion.identity);
-                Destroy(vfx, 1f);
-            }
-
-            if (rb != null)
-            {
-                rb.isKinematic = false;
-                rb.constraints = RigidbodyConstraints.None;
-            }
-
-            StartCoroutine(DamageCooldown());
-
-            if (Health <= 0)
-            {
-                isDead = true;
-                if (deathSource != null)
-                {
-                    deathSource.Play();
-                }
-                m_animator?.SetTrigger("Death");
-                fearDamage?.Dead();
-            }
+        if (Health <= 0)
+        {
+            fearConnection?.HBOFF();
+            isDead = true;
+            deathSource?.Play();
+            m_animator?.SetTrigger("Death");
+            fearDamage?.Dead();
+            OnFearEnemyDeath?.Invoke();
         }
     }
 
@@ -214,11 +240,6 @@ public class FearMovement : MonoBehaviour
         }
     }
 
-    public void DestroySelf()
-    {
-        Destroy(gameObject);
-    }
-
     public void Stop()
     {
         isTemporarilyStunned = true;
@@ -245,16 +266,21 @@ public class FearMovement : MonoBehaviour
 
     public void PlayStepSound()
     {
-        int index = Random.Range(0, 1);
+        int index = Random.Range(0, 2); // ✅ Fix: upper bound is exclusive
+        if (index == 0) step1Source?.Play();
+        else step2Source?.Play();
+    }
+    private void ShowDamagePopup(int damageAmount, Vector3 hitPoint)
+    {
+        if (damagePopupPrefab == null) return;
 
-        switch (index)
+        Vector3 spawnPos = hitPoint + Vector3.up * 1f; // Offset above hit
+        GameObject popup = Instantiate(damagePopupPrefab, spawnPos, Quaternion.identity);
+        DamagePopup popupScript = popup.GetComponent<DamagePopup>();
+        if (popupScript != null)
         {
-            case 0:
-                step1Source?.Play();
-                break;
-            case 1:
-                step2Source?.Play();
-                break;
+            popupScript.Setup(damageAmount, Color.white);
         }
     }
 }
+    

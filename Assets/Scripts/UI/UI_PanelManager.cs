@@ -1,4 +1,6 @@
+using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(AudioSource))]
 public class UI_PanelManager : MonoBehaviour
@@ -45,7 +47,13 @@ public class UI_PanelManager : MonoBehaviour
             }
         }
 
-        currentIndex = index;
+            currentIndex = index;
+    }
+
+    private IEnumerator PlayGame()
+    {
+        yield return new WaitForSeconds(.5f);
+        SceneManager.LoadScene("GameLevel");
     }
 
     /// <summary>
@@ -68,5 +76,10 @@ public class UI_PanelManager : MonoBehaviour
     {
         if (clip == null || audioSource == null) return;
         audioSource.PlayOneShot(clip, volume);
+    }
+
+    public void StartGame()
+    {
+        StartCoroutine(PlayGame());
     }
 }

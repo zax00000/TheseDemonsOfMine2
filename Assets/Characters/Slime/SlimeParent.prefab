@@ -190,8 +190,8 @@ NavMeshAgent:
   m_AutoTraverseOffMeshLink: 1
   m_AutoBraking: 1
   m_AutoRepath: 1
-  m_Height: 1.33
-  m_BaseOffset: 0
+  m_Height: 1.2
+  m_BaseOffset: -0.25
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
 --- !u!114 &7025710496764825233
@@ -222,6 +222,7 @@ MonoBehaviour:
   grabSource: {fileID: 3841744189402155133}
   hitSource: {fileID: 5486390606381025269}
   deathSource: {fileID: 715863951927893080}
+  damagePopupPrefab: {fileID: 8013505957384697299, guid: 0c5f62fddf1d34041b242cfe0e4f15d1, type: 3}
 --- !u!114 &6534908157413263691
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -287,9 +288,9 @@ CapsuleCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Radius: 0.5
-  m_Height: 1.58
+  m_Height: 1.3754734
   m_Direction: 1
-  m_Center: {x: 0, y: 0.59, z: 0}
+  m_Center: {x: 0, y: 0.6922633, z: 0}
 --- !u!82 &8857784655767235578
 AudioSource:
   m_ObjectHideFlags: 0
@@ -980,6 +981,10 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 26046aaf52e2b8040a7a602287af07cf, type: 3}
       propertyPath: m_Name
       value: GrabSlime
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 26046aaf52e2b8040a7a602287af07cf, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2690592928281143802}
-  - component: {fileID: 6480371049286085849}
+  - component: {fileID: 1937728399462805617}
   - component: {fileID: 2860390876238295509}
   - component: {fileID: 2055571736801791060}
   - component: {fileID: 9033096561270721134}
@@ -47,7 +47,7 @@ Transform:
   - {fileID: 8775626438767659782}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!195 &6480371049286085849
+--- !u!195 &1937728399462805617
 NavMeshAgent:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -56,17 +56,17 @@ NavMeshAgent:
   m_GameObject: {fileID: 879069621304188504}
   m_Enabled: 1
   m_AgentTypeID: 0
-  m_Radius: 0.5000001
+  m_Radius: 0.4
   m_Speed: 8
-  m_Acceleration: 16
+  m_Acceleration: 12
   avoidancePriority: 50
   m_AngularSpeed: 120
   m_StoppingDistance: 3
-  m_AutoTraverseOffMeshLink: 1
+  m_AutoTraverseOffMeshLink: 0
   m_AutoBraking: 1
   m_AutoRepath: 1
-  m_Height: 2.55
-  m_BaseOffset: 0
+  m_Height: 2
+  m_BaseOffset: -0.21
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
 --- !u!136 &2860390876238295509
@@ -88,10 +88,10 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.38
-  m_Height: 2.2707868
+  m_Radius: 0.29
+  m_Height: 2.3169959
   m_Direction: 1
-  m_Center: {x: 0, y: 1.1353934, z: 0}
+  m_Center: {x: 0, y: 1.1122888, z: 0}
 --- !u!54 &2055571736801791060
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -149,7 +149,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 565f02a60af4fbf4d8b93a795942b802, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  Health: 1200
+  Health: 2400
   rotationSpeed: 10
   movementSpeed: 8
   portalPrefab: {fileID: 3118087145514759983, guid: 5d532c2958b4afa45839ff7f49909e8e, type: 3}
@@ -164,6 +164,7 @@ MonoBehaviour:
   spawnSource: {fileID: 6234677155394560980}
   hitSource: {fileID: 964655504751608284}
   deathSource: {fileID: 6306012702366333611}
+  damagePopupPrefab: {fileID: 8013505957384697299, guid: 0c5f62fddf1d34041b242cfe0e4f15d1, type: 3}
 --- !u!82 &4385748718155583644
 AudioSource:
   m_ObjectHideFlags: 0

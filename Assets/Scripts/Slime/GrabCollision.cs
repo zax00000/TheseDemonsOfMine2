@@ -35,12 +35,13 @@ public class GrabCollision : MonoBehaviour
         {
             Sword sword = player.GetComponent<Sword>();
             
-            if (sword != null && sword.isParrying)
+            if (sword != null && sword.isParrying && !sword.parryTime)
             {
                 if (grab)
                 {
                     DeactivateGrab();
                     sword.ParryTime();
+                    return;
                 }
                 else
                 {
@@ -53,6 +54,7 @@ public class GrabCollision : MonoBehaviour
             if (grab)
             {
                 slimeConnection?.SuccesfulGrab(player);
+                return;
             }
             else
             {

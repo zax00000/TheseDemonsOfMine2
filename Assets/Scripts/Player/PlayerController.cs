@@ -50,6 +50,8 @@ public class PlayerController : MonoBehaviour
 
     private bool isDead = true;
 
+    private TrailRenderer tr;
+
     [Header("Sounds")]
 
     [SerializeField] private AudioSource dashSource;
@@ -67,6 +69,9 @@ public class PlayerController : MonoBehaviour
 
     void Start()
     {
+        tr = GetComponentInChildren<TrailRenderer>();
+        tr.emitting = false;
+        tr.enabled = false;
         controller = GetComponent<CharacterController>();
         animator = GetComponentInChildren<Animator>();
         sword = GetComponent<Sword>();
@@ -98,6 +103,8 @@ public class PlayerController : MonoBehaviour
         {
             StartCoroutine(Dash(delta));
             animator?.SetBool("Dash", true);
+            tr.enabled = true;
+            tr.emitting = true;
             sword?.Slash3();
         }
 
@@ -260,8 +267,10 @@ public class PlayerController : MonoBehaviour
 
         isDashing = false;
         animator?.SetBool("Dash", false);
+        tr.emitting = false;
 
         yield return new WaitForSeconds(dashCooldown);
+        tr.enabled = false;
         canDash = true;
     }
 

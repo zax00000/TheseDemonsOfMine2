@@ -1,4 +1,6 @@
+using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class FearConnection : MonoBehaviour
 {
@@ -10,7 +12,7 @@ public class FearConnection : MonoBehaviour
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
-    {
+    {   
         fearDamage = GetComponentInParent<FearDamage>();
         fearMovement = GetComponentInParent<FearMovement>();
         fearHitbox = GetComponentInChildren<FearHitbox>();
@@ -34,7 +36,7 @@ public class FearConnection : MonoBehaviour
 
     public void Death()
     {
-        fearMovement?.DestroySelf();
+        //unlock wall or do nothing
     }
 
     public void ResetCd()
@@ -55,5 +57,10 @@ public class FearConnection : MonoBehaviour
     public void Attack()
     { 
     fearDamage?.AttackSound();
+    }
+
+    public void HBOFF()
+    { 
+    fearHitbox.dead = true;
     }
 }
