@@ -193,6 +193,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   textMesh: {fileID: 4103662324570135392}
-  floatSpeed: 2
-  lifetime: 0.8
-  fadeOutSpeed: 3
+  floatSpeed: 5
+  lifetime: 0.5
+  fadeOutSpeed: 2

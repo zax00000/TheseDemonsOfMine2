@@ -10,6 +10,12 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Transform spawnPoint;
     [SerializeField] private Transform healthBarFill;
     [SerializeField] private Image eye;
+    [SerializeField] public Image ringUI;
+    [SerializeField] public Image parryUI;
+    [SerializeField] public Image A1UI;
+    [SerializeField] public Image A2UI;
+    [SerializeField] public Image A3UI;
+    [SerializeField] public Image ARing;
 
     [Header("Camera Settings")]
     [SerializeField] private CameraFollow cameraFollow;
@@ -80,11 +86,23 @@ public class GameManager : MonoBehaviour
             playerHealth.healthBarTransform = healthBarFill;
         }
 
+        // Assign dash indicator
+        PlayerController playerController = currentPlayer.GetComponent<PlayerController>();
+        if (playerController != null && ringUI != null)
+        {
+            playerController.ringUI = ringUI;
+        }
+
         // Assign UI Parry
         Sword playersword = currentPlayer.GetComponent<Sword>();
         if (playersword != null && eye != null)
         {
             playersword.eye = eye;
+            playersword.parryUI = parryUI;
+            playersword.A1UI = A1UI;
+            playersword.A2UI = A2UI;
+            playersword.A3UI = A3UI;
+            playersword.ARing = ARing;
         }
     }
 

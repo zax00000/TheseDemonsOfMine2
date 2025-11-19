@@ -1,4 +1,4 @@
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
 
 public class DamagePopup : MonoBehaviour
@@ -15,9 +15,11 @@ public class DamagePopup : MonoBehaviour
     public void Setup(int damageAmount, Color color)
     {
         textMesh.text = damageAmount.ToString();
-        textMesh.color = color;
         originalColor = color;
         timer = 0f;
+
+        // Force full alpha on spawn
+        textMesh.color = new Color(color.r, color.g, color.b, 1f);
     }
 
     void Update()
@@ -33,7 +35,7 @@ public class DamagePopup : MonoBehaviour
 
         // Fade out
         timer += Time.deltaTime;
-        float fade = 1f - (timer / lifetime);
+        float fade = Mathf.Clamp01(1f - (timer / lifetime));
         textMesh.color = new Color(originalColor.r, originalColor.g, originalColor.b, fade);
 
         if (timer >= lifetime)

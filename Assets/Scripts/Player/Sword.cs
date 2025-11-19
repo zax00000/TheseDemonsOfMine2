@@ -48,7 +48,6 @@ public class Sword : MonoBehaviour
     private Quaternion rootMotionDeltaRotation = Quaternion.identity;
     private bool applyRootMotionThisFrame = false;
 
-    public float attackCd;
     public float saveCd;
     public float parryCd;
 
@@ -71,9 +70,19 @@ public class Sword : MonoBehaviour
 
     public bool parryTime = false;
 
+    [SerializeField] public Image parryUI;
+    [SerializeField] public Image A1UI;
+    [SerializeField] public Image A2UI;
+    [SerializeField] public Image A3UI;
+    [SerializeField] public Image ARing;
+
     void Start()
     {
-        SetAlpha(.2f);
+        A1UI.enabled = true;
+        A2UI.enabled = false;
+        A3UI.enabled = false;
+        SetAlphaParry(1f);
+        SetAlpha(0f);
         playerHealth = GetComponent<PlayerHealth>();
         playerController = GetComponent<PlayerController>();
         SwordHitbox = GetComponentInChildren<SwordHitbox>();
@@ -157,13 +166,11 @@ public class Sword : MonoBehaviour
         {
             childAnimator.SetTrigger("HeldDraw");
             attackOnCooldown = true;
-            RestartAttackCooldown();
         }
         else if (isHeld)
         {
             childAnimator.SetTrigger("HeldAttack");
             attackOnCooldown = true;
-            RestartAttackCooldown();
         }
         else if (!equipped && !slash2 && !slash3)
         {
@@ -181,7 +188,6 @@ public class Sword : MonoBehaviour
             slash2 = false;
             attackOnCooldown = true;
             s2 = true;
-            RestartAttackCooldown();
         }
         else if (equipped && !slash2 && slash3)
         {
@@ -190,7 +196,6 @@ public class Sword : MonoBehaviour
             slash3 = false;
             attackOnCooldown = true;
             s3 = true;
-            RestartAttackCooldown();
         }
         else if (!equipped && !slash2 && slash3)
         {
@@ -199,30 +204,11 @@ public class Sword : MonoBehaviour
             slash3 = false;
             attackOnCooldown = true;
             s3 = true;
-            RestartAttackCooldown();
         }
 
             RestartSaveCooldown();
-    }
-
-    private IEnumerator AttackCooldown()
-    {
-        attackOnCooldown = true;
-        yield return new WaitForSecondsRealtime(attackCd);
-        attackOnCooldown = false;
-        attackCooldownRoutine = null;
-    }
-
-    public void RestartAttackCooldown()
-    {
-        if (attackCooldownRoutine != null)
-        {
-            StopCoroutine(attackCooldownRoutine);
-        }
-        if (!s2 && !s3)
-        {
-            attackCooldownRoutine = StartCoroutine(AttackCooldown());
-        }
+            UpdateUI();
+            AlphaAttack();
     }
 
     private IEnumerator SaveCooldown()
@@ -263,16 +249,16 @@ public class Sword : MonoBehaviour
         slash2 = true;
         attackOnCooldown = false;
         StartCoroutine(ResetSlash2());
-        Debug.Log("S2 available for 0.5");
+        UpdateUI();
+        AlphaAttack();
     }
 
     private IEnumerator ResetSlash2()
     {
         yield return new WaitForSecondsRealtime(0.5f);
-        Debug.Log("S2 end");
         slash2 = false;
-        attackOnCooldown = true;
-        RestartAttackCooldown();
+        UpdateUI();
+        AlphaAttack();
     }
 
     public void Slash3()
@@ -280,17 +266,17 @@ public class Sword : MonoBehaviour
         slash3 = true;
         attackOnCooldown = false;
         StartCoroutine(ResetSlash3());
-        Debug.Log("S3 available for 0.5");
         s2 = false;
+        UpdateUI();
+        AlphaAttack();
     }
 
     private IEnumerator ResetSlash3()
     {
         yield return new WaitForSecondsRealtime(0.5f);
-        Debug.Log("S3 end");
         slash3 = false;
-        attackOnCooldown = true;
-        RestartAttackCooldown();
+        UpdateUI();
+        AlphaAttack();
     }
 
     public void OnParry(InputAction.CallbackContext context)
@@ -311,6 +297,7 @@ public class Sword : MonoBehaviour
     {
         if (isDead) return;
 
+        SetAlphaParry(0.2f);
         parry = false;
         isParrying = true;
         childAnimator.SetTrigger("Parry2");
@@ -342,11 +329,15 @@ public class Sword : MonoBehaviour
     public void setS3False()
     {
         s3 = false;
+        attackOnCooldown = false;
+        UpdateUI();
+        AlphaAttack();
     }
 
     private IEnumerator ParryCooldown()
     {
         yield return new WaitForSecondsRealtime(parryCd);
+        SetAlphaParry(1f);
         parryCooldownRoutine = null;
         parry = true;
     }
@@ -385,7 +376,7 @@ public class Sword : MonoBehaviour
         }
         if (isParryTimeActive) return;
         isParryTimeActive = true;
-        SetAlpha(1f);
+        StartCoroutine(FadeAlphaToPointOneRealtime(5f));
         parryTimeRoutine = StartCoroutine(SlowWorldExceptPlayer(0.1f, 5f));
         Debug.Log("Parry Time Activated");
     }
@@ -406,7 +397,6 @@ public class Sword : MonoBehaviour
         playerHealth.damaged = false;
         Time.timeScale = 1f;
         Time.fixedDeltaTime = 0.02f;
-        SetAlpha(.2f);
 
         childAnimator.updateMode = AnimatorUpdateMode.Normal;
         playerController.UseUnscaledTime(false);
@@ -464,6 +454,98 @@ public class Sword : MonoBehaviour
             Color color = eye.color;
             color.a = Mathf.Clamp01(alpha); // Clamp between 0 and 1
             eye.color = color;
+        }
+    }
+    public IEnumerator FadeAlphaToPointOneRealtime(float duration)
+    {
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            float t = elapsed / duration;
+            float alpha = Mathf.Lerp(1f, 0f, t);
+            SetAlpha(alpha);
+            elapsed += Time.unscaledDeltaTime;
+            yield return null;
+        }
+        SetAlpha(0f); // Ensure it ends at 0.1
+    }
+    public void SetAlphaParry(float alpha)
+    {
+        if (parryUI != null)
+        {
+            Color color = parryUI.color;
+            color.a = Mathf.Clamp01(alpha); // Clamp between 0 and 1
+            parryUI.color = color;
+        }
+    }
+
+    public void UpdateUI()
+    {
+        if (attackOnCooldown && isHeld)
+        {
+            A1UI.enabled = true;
+            A2UI.enabled = false;
+            A3UI.enabled = false;
+            return;
+        }
+        else if (attackOnCooldown && !s2 && !s3)
+        {
+            A1UI.enabled = false;
+            A2UI.enabled = true;
+            A3UI.enabled = false;
+        }
+        else if (attackOnCooldown && s2 && !s3)
+        {
+            A1UI.enabled = false;
+            A2UI.enabled = false;
+            A3UI.enabled = true;
+        }
+        else if (attackOnCooldown && !s2 && s3)
+        {
+            A1UI.enabled = true;
+            A2UI.enabled = false;
+            A3UI.enabled = false;
+        }
+        else if (!attackOnCooldown && !slash2 && !slash3)
+        {
+            A1UI.enabled = true;
+            A2UI.enabled = false;
+            A3UI.enabled = false;
+        }
+        else if (!attackOnCooldown && slash2 && !slash3)
+        {
+            A1UI.enabled = false;
+            A2UI.enabled = true;
+            A3UI.enabled = false;
+        }
+        else if (!attackOnCooldown && !slash2 && slash3)
+        {
+            A1UI.enabled = false;
+            A2UI.enabled = false;
+            A3UI.enabled = true;
+        }
+        return;
+    }
+
+    private void AlphaAttack()
+    {
+        if (attackOnCooldown)
+        {
+            SetAlphaAttack(.2f);
+        }
+        else
+        {
+            SetAlphaAttack(1f);
+        }
+    }
+
+    private void SetAlphaAttack(float alpha)
+    {
+        if (ARing != null)
+        {
+            Color color = ARing.color;
+            color.a = Mathf.Clamp01(alpha); // Clamp between 0 and 1
+            ARing.color = color;
         }
     }
 }

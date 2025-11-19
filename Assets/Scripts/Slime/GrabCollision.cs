@@ -3,24 +3,20 @@ using UnityEngine;
 
 public class GrabCollision : MonoBehaviour
 {
-    public Collider grabLCollider;
-    public Collider grabRCollider;
-    public Collider punchLCollider;
-    public Collider punchRCollider;
+    [SerializeField] private Collider grabLCollider;
+    [SerializeField] private Collider grabRCollider;
   
     private SlimeConnection slimeConnection;
 
     public LayerMask targetLayer;
 
-    private bool grab = false;
+    private bool grab;
 
     void Start()
     {
+        grab = false;
         grabLCollider.enabled = false;
         grabRCollider.enabled = false;
-
-        punchLCollider.enabled = false;
-        punchRCollider.enabled = false;
 
         slimeConnection = GetComponentInParent<SlimeConnection>();
     }
@@ -33,75 +29,37 @@ public class GrabCollision : MonoBehaviour
         PlayerController player = other.GetComponent<PlayerController>();
         if (player != null)
         {
+            if (!grab)
+            {
+                return;
+            }
             Sword sword = player.GetComponent<Sword>();
             
             if (sword != null && sword.isParrying && !sword.parryTime)
             {
-                if (grab)
-                {
                     DeactivateGrab();
                     sword.ParryTime();
                     return;
-                }
-                else
-                {
-                    DeactivateLPunch();
-                    DeactivateRPunch();
-                    sword.ParryTime();
-                    return;
-                }
-            }
-            if (grab)
-            {
-                slimeConnection?.SuccesfulGrab(player);
-                return;
             }
             else
             {
-                PlayerHealth playerHealth = other.GetComponent<PlayerHealth>();
-                if (playerHealth != null)
-                {
-                    playerHealth.TakeDamage(30);
-                }
+                slimeConnection?.SuccesfulGrab(player);
+                return;
             }
         }
     }
 
     public void ActivateGrab()
     {
+        grab = true;
         grabLCollider.enabled = true;
         grabRCollider.enabled = true;
-        grab = true;
     }
 
     public void DeactivateGrab()
     {
-        grabLCollider.enabled = false;
-        grabRCollider.enabled = false;
         grab = false;
-    }
-
-    public void ActivateRPunch()
-    {
-        punchRCollider.enabled = true;
-        grabRCollider.enabled = true;
-    }
-
-    public void DeactivateRPunch()
-    {
-        punchRCollider.enabled = false;
-        grabRCollider.enabled = false;
-    }
-
-    public void ActivateLPunch()
-    {
-        punchLCollider.enabled = true;
-        grabLCollider.enabled = true;
-    }
-
-    public void DeactivateLPunch()
-    {
-        punchLCollider.enabled = false;
         grabLCollider.enabled = false;
+        grabRCollider.enabled = false;
     }
 }

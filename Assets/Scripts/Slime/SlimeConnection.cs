@@ -6,10 +6,13 @@ public class SlimeConnection : MonoBehaviour
 
     private GrabCollision GrabCollision;
 
+    private PunchCollision PunchCollision;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         slime = GetComponentInParent<Slime>();
+        PunchCollision = GetComponentInChildren<PunchCollision>();
         GrabCollision = GetComponentInChildren<GrabCollision>();
     }
 
@@ -41,22 +44,24 @@ public class SlimeConnection : MonoBehaviour
 
     public void RPunchOn()
     {
-        GrabCollision?.ActivateRPunch();
+        GrabCollision.DeactivateGrab();
+        PunchCollision?.ActivateRPunch();
     }
 
     public void RPunchOff()
     {
-        GrabCollision?.DeactivateRPunch();
+        PunchCollision?.DeactivateRPunch();
     }
 
     public void LPunchOn()
-    { 
-    GrabCollision?.ActivateLPunch();
+    {
+        GrabCollision.DeactivateGrab();
+        PunchCollision?.ActivateLPunch();
     }
 
     public void LPunchOff()
     { 
-    GrabCollision?.DeactivateLPunch();
+        PunchCollision?.DeactivateLPunch();
     }
 
     public void PunchSound()

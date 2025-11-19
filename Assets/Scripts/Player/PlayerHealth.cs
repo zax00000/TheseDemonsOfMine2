@@ -91,7 +91,7 @@ public class PlayerHealth : MonoBehaviour
 
     IEnumerator DamageCooldown()
     {
-        yield return new WaitForSecondsRealtime(.2f);
+        yield return new WaitForSecondsRealtime(.3f);
         damaged = false;
     }
 

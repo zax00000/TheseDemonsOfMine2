@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.Animations;
 using UnityEngine.Audio;
+using UnityEngine.UI;
 using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
@@ -58,6 +59,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private AudioSource jumpSource;
     [SerializeField] private AudioSource walkSource;
 
+    [SerializeField] public Image ringUI;
+
     public void UseUnscaledTime(bool value)
     {
         useUnscaledTime = value;
@@ -69,6 +72,7 @@ public class PlayerController : MonoBehaviour
 
     void Start()
     {
+        SetAlpha(1);
         tr = GetComponentInChildren<TrailRenderer>();
         tr.emitting = false;
         tr.enabled = false;
@@ -246,6 +250,7 @@ public class PlayerController : MonoBehaviour
 
     private IEnumerator Dash(float delta)
     {
+        SetAlpha(0.2f);
         isDashing = true;
         if (dashSource != null)
         {
@@ -272,6 +277,7 @@ public class PlayerController : MonoBehaviour
         yield return new WaitForSeconds(dashCooldown);
         tr.enabled = false;
         canDash = true;
+        SetAlpha(1f);
     }
 
     void OnControllerColliderHit(ControllerColliderHit hit)
@@ -291,7 +297,6 @@ public class PlayerController : MonoBehaviour
     {
         moveSpeed = 6.5f;
         sword?.setS3False();
-        sword?.RestartAttackCooldown();
     }
 
     public bool IsDashing()
@@ -328,6 +333,15 @@ public class PlayerController : MonoBehaviour
         if (walkSource != null)
         {
             walkSource.Play();
+        }
+    }
+    public void SetAlpha(float alpha)
+    {
+        if (ringUI != null)
+        {
+            Color color = ringUI.color;
+            color.a = Mathf.Clamp01(alpha); // Clamp between 0 and 1
+            ringUI.color = color;
         }
     }
 }
