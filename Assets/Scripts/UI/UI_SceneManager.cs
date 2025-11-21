@@ -5,7 +5,6 @@ using UnityEngine.SceneManagement;
 public class SimpleSceneManager : MonoBehaviour
 {
     [SerializeField] private GameObject pauseMenu;
-    [SerializeField] private GameObject gameOverPanel;
     [SerializeField] private GameObject Menu;
 
     private ToggleUIOnEscape toggleUIOnEscape;
@@ -15,42 +14,29 @@ public class SimpleSceneManager : MonoBehaviour
         toggleUIOnEscape = GetComponent<ToggleUIOnEscape>();
     }
 
-    public void LoadScene(string sceneName)
-    {
-        SceneManager.LoadScene(sceneName);
-    }
-
-    public void ReloadCurrent()
-    {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-    }
-
-    public void QuitGame()
-    {
-        Application.Quit();
-    }
-
     public void ResumeGame()
     {
-        if (pauseMenu != null)
-        {
-            Menu.SetActive(false);
-            toggleUIOnEscape.active = false;
-            Cursor.visible = false;
-            Cursor.lockState = CursorLockMode.Locked;
-        }
-
-        if (gameOverPanel != null)
-        {
-            gameOverPanel.SetActive(false);
-        }
-
-        Time.timeScale = 1f;
+    toggleUIOnEscape?.OFF();
     }
 
     public void END()
     {
         SceneManager.LoadScene("END");
     }
-
+    public void Back()
+    {
+        SceneManager.LoadScene("MainMenu");
+    }
+    public void Play()
+    {
+        SceneManager.LoadScene("GameLevel");
+    }
+    public void PauseBack()
+    {
+        if (pauseMenu != null)
+        {
+            toggleUIOnEscape.OFF2();
+        }
+        SceneManager.LoadScene("MainMenu");
+    }
 }

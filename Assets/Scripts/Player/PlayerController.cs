@@ -2,8 +2,9 @@
 using UnityEngine;
 using UnityEngine.Animations;
 using UnityEngine.Audio;
-using UnityEngine.UI;
+using UnityEngine.Events;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
@@ -61,6 +62,10 @@ public class PlayerController : MonoBehaviour
 
     [SerializeField] public Image ringUI;
 
+    private Vector3 targetPosition = new Vector3(-0.9132468f, 5.269218f, 807.9656f);
+
+    public static event System.Action Finished;
+
     public void UseUnscaledTime(bool value)
     {
         useUnscaledTime = value;
@@ -83,7 +88,14 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        if (transform.position.z > 780)
+        {
+            Finish();
+        }
+
         if (isDead) return;
+
+
         float delta = useUnscaledTime ? Time.unscaledDeltaTime : Time.deltaTime;
 
         if (isMoveHeld)
@@ -343,5 +355,18 @@ public class PlayerController : MonoBehaviour
             color.a = Mathf.Clamp01(alpha); // Clamp between 0 and 1
             ringUI.color = color;
         }
+    }
+
+    private void Finish()
+    {
+        isDead = true;
+        sword.isDead = true;
+        Finished?.Invoke();
+
+        transform.position = Vector3.MoveTowards(
+            transform.position,
+            targetPosition,
+            moveSpeed * Time.deltaTime
+        );
     }
 }

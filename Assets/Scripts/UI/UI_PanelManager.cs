@@ -9,7 +9,7 @@ public class UI_PanelManager : MonoBehaviour
     public GameObject[] panels;
 
     [Header("Audio Settings")]
-    public AudioSource audioSource;     // Optional – if null, uses this object's AudioSource
+    public AudioSource audioSource;
     public AudioClip openSound;
     public AudioClip closeSound;
     [Range(0f, 1f)] public float volume = 1f;
@@ -20,12 +20,27 @@ public class UI_PanelManager : MonoBehaviour
     {
         if (!audioSource)
             audioSource = GetComponent<AudioSource>();
+
+        // Ensure panels are hidden at startup
+        ResetPanels();
     }
 
-    /// <summary>
-    /// Show panel by index and hide all others.
-    /// Plays open/close sounds as needed.
-    /// </summary>
+    void OnEnable()
+    {
+        // Extra safety: reset when object is re-enabled
+        ResetPanels();
+    }
+
+    private void ResetPanels()
+    {
+        foreach (GameObject panel in panels)
+        {
+            if (panel != null)
+                panel.SetActive(false);
+        }
+        currentIndex = -1;
+    }
+
     public void ShowPanel(int index)
     {
         if (index < 0 || index >= panels.Length) return;
@@ -47,18 +62,19 @@ public class UI_PanelManager : MonoBehaviour
             }
         }
 
-            currentIndex = index;
+        currentIndex = index;
     }
 
     private IEnumerator PlayGame()
     {
-        yield return new WaitForSeconds(.5f);
+        yield return new WaitForSeconds(0.5f);
+
+        // Optional: reset time scale before loading
+        Time.timeScale = 1f;
+
         SceneManager.LoadScene("GameLevel");
     }
 
-    /// <summary>
-    /// Hides all panels and plays the close sound.
-    /// </summary>
     public void HideAllPanels()
     {
         foreach (GameObject panel in panels)
